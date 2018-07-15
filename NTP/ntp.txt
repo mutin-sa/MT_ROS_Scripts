@@ -1,0 +1,41 @@
+################################################################
+# Check and set NTP servers - "setntppool"
+
+# NTP pools to use (check www.pool.ntp.org)
+:local ntpa "0.ru.pool.ntp.org";
+:local ntpb "1.ru.pool.ntp.org";
+
+# Resolve the two ntp pool hostnames
+:local ntpipa [:resolve $ntpa];
+:local ntpipb [:resolve $ntpb];
+
+# Get the current settings
+:local ntpcura [/system ntp client get primary-ntp];
+:local ntpcurb [/system ntp client get secondary-ntp];
+
+# Debug output
+:put ("Old: " . $ntpcura . " New: " . $ntpipa);
+:put ("Old: " . $ntpcurb . " New: " . $ntpipb);
+
+# Change primary if required
+:if ($ntpipa != $ntpcura) do={
+    :put "Changing primary NTP";
+    /system ntp client set primary-ntp="$ntpipa";
+    }
+
+# Change secondary if required
+:if ($ntpipb != $ntpcurb) do={
+    :put "Changing secondary NTP";
+    /system ntp client set secondary-ntp="$ntpipb";
+    }
+################################################################
+/system scheduler add \
+  comment="Check and set NTP servers" \
+  disabled=no \
+  interval=12h \
+  name=CheckNTPServers \
+  on-event=setntppool \
+  policy=read,write,test \
+  start-date=jan/01/1970 \
+  start-time=16:00:00
+  

@@ -1,40 +1,42 @@
-################################################################
-# Check and set NTP servers - "setntppool"
+################################################################################################################################
+# Check and set NTP servers - "ntp_client-set_servers_ip_by_dns_names"
 
 # NTP pools to use (check www.pool.ntp.org)
-:local ntpa "0.ru.pool.ntp.org";
-:local ntpb "1.ru.pool.ntp.org";
+:local PriNTPSrvDNSName "0.ru.pool.ntp.org";
+:local SecNTPSrvDNSName "1.ru.pool.ntp.org";
 
 # Resolve the two ntp pool hostnames
-:local ntpipa [:resolve $ntpa];
-:local ntpipb [:resolve $ntpb];
+:local PriNTPSrvIPAddr [:resolve $PriNTPSrvDNSName];
+:local SecNTPSrvIPAddr [:resolve $SecNTPSrvDNSName];
 
 # Get the current settings
-:local ntpcura [/system ntp client get primary-ntp];
-:local ntpcurb [/system ntp client get secondary-ntp];
-
-# Debug output
-:put ("Old: " . $ntpcura . " New: " . $ntpipa);
-:put ("Old: " . $ntpcurb . " New: " . $ntpipb);
+:local CurSysPriNTPSrvIPAddr [/system ntp client get primary-ntp];
+:local CurSysSecNTPSrvIPAddr [/system ntp client get secondary-ntp];
 
 # Change primary if required
-:if ($ntpipa != $ntpcura) do={
-    :put "Changing primary NTP";
-    /system ntp client set primary-ntp="$ntpipa";
+:if ($PriNTPSrvIPAddr != $CurSysPriNTPSrvIPAddr) do={
+    # Debug output
+    :put ("Old Primary NTP Server: " . $CurSysPriNTPSrvIPAddr . " New Primary NTP Server: " . $PriNTPSrvIPAddr);
+
+    :put "Changing Primary NTP Server Address";
+    /system ntp client set primary-ntp="$PriNTPSrvIPAddr";
     }
 
 # Change secondary if required
-:if ($ntpipb != $ntpcurb) do={
-    :put "Changing secondary NTP";
-    /system ntp client set secondary-ntp="$ntpipb";
+:if ($SecNTPSrvIPAddr != $CurSysSecNTPSrvIPAddr) do={
+    # Debug output
+    :put ("Old Secondary NTP Server: " . $CurSysSecNTPSrvIPAddr . " New Secondary NTP Server: " . $SecNTPSrvIPAddr);
+
+    :put "Changing Secondary NTP Server Address";
+    /system ntp client set secondary-ntp="$SecNTPSrvIPAddr";
     }
-################################################################
+################################################################################################################################
 /system scheduler add \
-  comment="Check and set NTP servers" \
+  comment="Set or update NTP servers IP addressess in MikroTik NTP client by their DNS names" \
   disabled=no \
   interval=12h \
-  name=CheckNTPServers \
-  on-event=setntppool \
+  name=ntp_client-set_servers_ip_by_dns_names \
+  on-event=ntp_client-set_servers_ip_by_dns_names \
   policy=read,write,test \
   start-date=jan/01/1970 \
   start-time=16:00:00

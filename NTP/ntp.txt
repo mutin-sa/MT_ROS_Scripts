@@ -41,3 +41,4 @@ add comment="Set or update NTP servers IP addressess in MikroTik NTP client by t
   policy=read,write,test \
   start-date=jan/01/1970 \
   start-time=00:00:00
+

@@ -1,43 +1,43 @@
-################################################################################################################################
-# Check and set NTP servers - "ntp_client-set_servers_ip_by_dns_names"
+/system script
+add comment="Set or update NTP servers IP addressess in MikroTik NTP client by their DNS names" name=ntp_client-set_servers_ip_by_dns_names policy=read,write,test source="# Check a\
+    nd set NTP servers - \"ntp_client-set_servers_ip_by_dns_names\"\r\
+    \n\r\
+    \n# NTP pools to use (check www.pool.ntp.org)\r\
+    \n:local PriNTPSrvDNSName \"0.ru.pool.ntp.org\";\r\
+    \n:local SecNTPSrvDNSName \"1.ru.pool.ntp.org\";\r\
+    \n\r\
+    \n# Resolve the two ntp pool hostnames\r\
+    \n:local PriNTPSrvIPAddr [:resolve \$PriNTPSrvDNSName];\r\
+    \n:local SecNTPSrvIPAddr [:resolve \$SecNTPSrvDNSName];\r\
+    \n\r\
+    \n# Get the current settings\r\
+    \n:local CurSysPriNTPSrvIPAddr [/system ntp client get primary-ntp];\r\
+    \n:local CurSysSecNTPSrvIPAddr [/system ntp client get secondary-ntp];\r\
+    \n\r\
+    \n# Change primary if required\r\
+    \n:if (\$PriNTPSrvIPAddr != \$CurSysPriNTPSrvIPAddr) do={\r\
+    \n    # Debug output\r\
+    \n    :put (\"Old Primary NTP Server: \" . \$CurSysPriNTPSrvIPAddr . \" New Primary NTP Server: \" . \$PriNTPSrvIPAddr);\r\
+    \n\r\
+    \n    :put \"Changing Primary NTP Server Address\";\r\
+    \n    /system ntp client set primary-ntp=\"\$PriNTPSrvIPAddr\";\r\
+    \n    }\r\
+    \n\r\
+    \n# Change secondary if required\r\
+    \n:if (\$SecNTPSrvIPAddr != \$CurSysSecNTPSrvIPAddr) do={\r\
+    \n    # Debug output\r\
+    \n    :put (\"Old Secondary NTP Server: \" . \$CurSysSecNTPSrvIPAddr . \" New Secondary NTP Server: \" . \$SecNTPSrvIPAddr);\r\
+    \n\r\
+    \n    :put \"Changing Secondary NTP Server Address\";\r\
+    \n    /system ntp client set secondary-ntp=\"\$SecNTPSrvIPAddr\";\r\
+    \n    }"
 
-# NTP pools to use (check www.pool.ntp.org)
-:local PriNTPSrvDNSName "0.ru.pool.ntp.org";
-:local SecNTPSrvDNSName "1.ru.pool.ntp.org";
-
-# Resolve the two ntp pool hostnames
-:local PriNTPSrvIPAddr [:resolve $PriNTPSrvDNSName];
-:local SecNTPSrvIPAddr [:resolve $SecNTPSrvDNSName];
-
-# Get the current settings
-:local CurSysPriNTPSrvIPAddr [/system ntp client get primary-ntp];
-:local CurSysSecNTPSrvIPAddr [/system ntp client get secondary-ntp];
-
-# Change primary if required
-:if ($PriNTPSrvIPAddr != $CurSysPriNTPSrvIPAddr) do={
-    # Debug output
-    :put ("Old Primary NTP Server: " . $CurSysPriNTPSrvIPAddr . " New Primary NTP Server: " . $PriNTPSrvIPAddr);
-
-    :put "Changing Primary NTP Server Address";
-    /system ntp client set primary-ntp="$PriNTPSrvIPAddr";
-    }
-
-# Change secondary if required
-:if ($SecNTPSrvIPAddr != $CurSysSecNTPSrvIPAddr) do={
-    # Debug output
-    :put ("Old Secondary NTP Server: " . $CurSysSecNTPSrvIPAddr . " New Secondary NTP Server: " . $SecNTPSrvIPAddr);
-
-    :put "Changing Secondary NTP Server Address";
-    /system ntp client set secondary-ntp="$SecNTPSrvIPAddr";
-    }
-################################################################################################################################
-/system scheduler add \
-  comment="Set or update NTP servers IP addressess in MikroTik NTP client by their DNS names" \
+/system scheduler
+  add comment="Set or update NTP servers IP addressess in MikroTik NTP client by their DNS names" \
   disabled=no \
-  interval=12h \
+  interval=6h \
   name=ntp_client-set_servers_ip_by_dns_names \
   on-event=ntp_client-set_servers_ip_by_dns_names \
   policy=read,write,test \
   start-date=jan/01/1970 \
-  start-time=16:00:00
-  
+  start-time=00:00:00
